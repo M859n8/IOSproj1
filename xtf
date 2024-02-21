@@ -1,0 +1,141 @@
+#!/bin/sh
+
+
+export POSIXLY_CORRECT=yes
+# if [ -z "${XTF_PROFIT:-}" ]; then
+#     echo "set profit to 20"
+export XTF_PROFIT=20
+# # fi
+# echo "hodnota = $XTF_PROFIT "
+filtr(){
+    if [ "$1" = "-a" ] || [ "$1" = "-b" ] || [ "$1" = "-c" ] ; then   #add processing for several filtres
+        filtr=$1
+        shift
+        filtr_data=$1
+        shift
+        prikaz "$@"
+    else
+        prikaz "$@"
+    fi
+
+}
+
+prikaz(){
+    if [ "$1" = "list" ] || [ "$1" = "list-currency" ] || [ "$1" = "status" ] || [ "$1" = "profit" ]; then
+        prikaz=$1
+        shift
+        uzivatel "$@"
+    
+    else
+        prikaz="list"
+        uzivatel "$@"
+    fi
+}
+
+uzivatel(){
+    name=$1
+    shift
+    log "$@"
+}
+# filtrovani(){
+
+#     if [ "$filtr" = "-a" ] ; then   
+#         newlist=$(echo $1 | awk -F ';' -v date="$filtr_data" '{
+#             if (date > $2) {
+#                 print $0
+#             }
+#         }')
+#     # elif  [ "$filtr" = "-b" ] ; then
+#     #     $1=$(echo "$1" | awk -F "," -v date="$filtr" '{
+#     #         if (date <= $2) {
+#     #             print $0
+#     #         }
+#     #     }')
+#     # elif  [ "$filtr" = "-c" ] ; then
+        
+
+#     # elif [ -z "$filtr" ] ; then
+        
+#     fi
+# }
+
+log(){
+    if [ -z "$1" ]; then
+        echo "no logfile"
+    fi
+    for arg in "$@"; do #for several logs
+
+
+        if [ -f "$arg" ]; then  #chek if this is a file and write list of users
+            if [ "$prikaz" = "list" ]; then
+                grep "$name" "$arg"
+                # newlist=$(grep "$name" "$arg")
+                # newlist=$(awk -v name="$name" '$0 ~ name')
+                # echo "$newlist"
+            elif [ "$prikaz" = "list-currency" ]; then
+                grep "$name" "$arg" | awk -F ';' '{print $3}' | sort -u  #DOES NOT SORT IF THE ARE MULTIPLE FILES
+                #search all lines with name and use awk to divide row by ; 
+                #and write third part which contains currency
+            elif [ "$prikaz" = "status" ]; then
+                # grep "$name" "$arg" | awk -F ';' -v num="$num" 'BEGIN {sum = 0} {print $3 " : " $4; sum += $4} END {print "Total: " sum}' |
+
+                grep "$name" "$arg" | awk -F ';' '
+                    {
+                        # Якщо ця валюта вже була зустрінута, додати баланс до суми для цієї валюти
+                        if ($3 in currency_sum) {
+                            currency_sum[$3] += $4
+                        } else {
+                            # Інакше створити новий запис для цієї валюти
+                            currency_sum[$3] = $4
+                        }
+                    }
+                    END {
+                        # Вивести суму для кожної валюти
+                        for (currency in currency_sum) {
+                            print currency " : " currency_sum[currency]
+                        }
+                    }
+                ' | sort  #i hope this sort will sort currency by alfabet 
+                
+                
+
+            elif [ "$prikaz" = "profit" ]; then
+                grep "$name" "$arg" | awk -F ';' -v XTF_PROFIT="$XTF_PROFIT" '
+                    {
+                        # Якщо ця валюта вже була зустрінута, додати баланс до суми для цієї валюти
+                        if ($3 in currency_sum) {
+                            currency_sum[$3] += $4
+                        } else {
+                            # Інакше створити новий запис для цієї валюти
+                            currency_sum[$3] = $4
+                        }
+                    }
+                    END {
+                        # Вивести суму для кожної валюти
+                        for (currency in currency_sum) {
+                            if (currency_sum[currency] > 0){
+                                # num = sprintf("%.4f", currency_sum[currency] * XTF_PROFIT * 0.01 )   #ВАРІАНТ ІЗ ЗАОКРУГЛЕННЯ, НЕ ВПЕВНЕНА ЩО ВІН  ПОТРІБНИЙ
+                                num = currency_sum[currency] * XTF_PROFIT * 0.01
+                                currency_sum[$3] +=  num
+                            }
+                            print currency " : " currency_sum[currency] 
+                        }
+                    }
+                ' | sort
+
+            fi
+        else
+            echo "$1 is not a file"
+        fi
+    done
+}
+
+
+if [ "$1" = "-hl" ] || [ "$1" = "--help" ]; then
+    echo "xtf [-h|--help] [FILTR] [PŘÍKAZ] UŽIVATEL LOG [LOG2 [...] "
+elif [ -z "$1" ]; then
+    echo "no arguments"
+else
+    filtr "$@"
+
+fi
