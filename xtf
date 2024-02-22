@@ -1,6 +1,5 @@
 #!/bin/sh
 
-
 export POSIXLY_CORRECT=yes
 # if [ -z "${XTF_PROFIT:-}" ]; then
 #     echo "set profit to 20"
@@ -8,12 +7,25 @@ export XTF_PROFIT=20
 # # fi
 # echo "hodnota = $XTF_PROFIT "
 filtr(){
-    if [ "$1" = "-a" ] || [ "$1" = "-b" ] || [ "$1" = "-c" ] ; then   #add processing for several filtres
-        filtr=$1
+    if [ "$1" = "-a" ] ; then   #add processing for several filtres
+        filtr_a=$1
         shift
-        filtr_data=$1
+        after=$1
         shift
         prikaz "$@"
+    elif [ "$1" = "-b" ] ; then
+        filtr_b=$1
+        shift
+        before=$1
+        shift 
+        prikaz "$@"
+    elif [ "$1" = "-c" ] ; then
+        filtr_c=$1
+        shift
+        currency=$1
+        shift 
+        prikaz "$@"   
+
     else
         prikaz "$@"
     fi
@@ -25,7 +37,8 @@ prikaz(){
         prikaz=$1
         shift
         uzivatel "$@"
-    
+    elif [ "$1" = "-a" ] || [ "$1" = "-b" ] || [ "$1" = "-c" ] ; then #for several filtres 
+        filtr "$@"   
     else
         prikaz="list"
         uzivatel "$@"
@@ -67,34 +80,46 @@ log(){
 
 
         if [ -f "$arg" ]; then  #chek if this is a file and write list of users
+            # newlist=$(cat "$arg") #for processing multiple filtres
 
-            if [ "$filtr" = "-a" ]; then
-                newlist=$(awk -v date="$filtr_data" -F ';' '$2 > date' "$arg")
+            if [ -n "$newlist" ]; then
+                newlist=$(echo "$newlist" | cat - "$arg")
+            else
+                newlist=$(cat "$arg")
+            fi
+            # echo "ontain of newlist " "$newlist"
+            if [ "$filtr_a" ]; then
+                newlist=$(echo "$newlist" | awk -v date="$after" -F ';' '$2 > date' )
                 # echo "$newlist"
             fi
-            if [ "$filtr" = "-b" ]; then
-                newlist=$(awk -v date="$filtr_data" -F ';' '$2 < date' "$arg")
+            if [ "$filtr_b" ]; then
+                newlist=$(echo "$newlist" | awk -v date="$before" -F ';' '$2 < date' )
                 # echo "$newlist"
             fi
-             if [ "$filtr" = "-c" ]; then
-                newlist=$(awk -v currency="$filtr_data" -F ';' '$3 == currency' "$arg")
+            if [ "$filtr_c" ]; then
+                # newlist=$(awk -v currency="$currency" -F ';' '$3 == currency' "$newlist")
+                newlist=$(echo "$newlist" | awk -v currency="$currency" -F ';' '$3 == currency' )
                 # echo "$newlist"
-
             fi
-             
+        else
+            echo "$1 is not a file"   
+            #add standart error output
+        fi
+    done         
             if [ "$prikaz" = "list" ]; then
                 # grep "$name" "$arg"
                 # newlist=$(grep "$name" "$arg")
                 # newlist=$(awk -v name="$name" '$0 ~ name')
                 # echo "$newlist"
                 # Пошук рядків, що містять задане ім'я у змінній newlist
-                echo "$newlist" | grep "$name"
+                echo "$newlist" | grep "$name" | sort -u
+                # echo "$newlist" | grep "$name"
             elif [ "$prikaz" = "list-currency" ]; then
                 # grep "$name" "$arg" | awk -F ';' '{print $3}' | sort -u  #DOES NOT SORT IF THE ARE MULTIPLE FILES
                 #search all lines with name and use awk to divide row by ; 
                 #and write third part which contains currency
-                echo "$newlist" | grep "$name"| awk -F ';' '{print $3}' | sort -u #DOES NOT SORT IF THE ARE MULTIPLE FILES
-                
+                # echo "$newlist" | grep "$name"| awk -F ';' '{print $3}' | sort -u #DOES NOT SORT IF THE ARE MULTIPLE FILES
+                echo "$newlist" | grep "$name"| awk -F ';' '{print $3}' | sort -u
             elif [ "$prikaz" = "status" ]; then
                 #DOES NOT add IF THE ARE MULTIPLE FILES
                 echo "$newlist" | grep "$name"| awk -F ';' '
@@ -142,11 +167,13 @@ log(){
                 ' | sort
 
             fi
-        else
-            echo "$1 is not a file"   
-            #add standart error output
-        fi
-    done
+        # else
+        #     echo "$1 is not a file"   
+        #     #add standart error output
+        # fi
+        
+    # done
+    # echo "$newlist"
 }
 
 
