@@ -57,6 +57,7 @@ Skript analyzuje záznamy (logy) pouze ze zadaných souborů v daném pořadí.
 Formát logu je CSV, kde oddělovačem je znak středníku ;. Formát je řádkový, každý řádek odpovídá záznamu transakce provedené na kryptoměnové burze ve tvaru
  ```bash
 JMENO UZIVATELE;DATUM A CAS;MENA;HODNOTA
+```
 kde
 
 JMENO UZIVATELE označuje uživatelské jméno klienta. Pro jednoduchost uvažujte, že se jedná o řetězec obsahující pouze tisknutelné ASCII znaky bez bílých znaků nebo znaku středníku.
@@ -64,9 +65,10 @@ DATUM A CAS jsou ve formátu YYYY-MM-DD HH:MM:SS
 MENA je třípísmenný kód (krypto)měny, např USD, EUR, CZK, BTC, ETH atd.
 HODNOTA je hodnota transakce. Záporná hodnota značí prodej (resp. výběr) a kladná hodnota značí nákup (resp. vložení) měny. HODNOTA je desetinné číslo s přesností na čtyři desetinná místa s tečkou jako oddělovacím znakem.
 ### Příklad záznamů:
-
+ ```bash
 CryptoWiz;2024-01-14 23:43:13;EUR;-3000.0000
 CryptoWiz;2024-01-14 23:43:15;ETH;1.2313
+```
 První záznam značí prodej 3000 jednotek měny Euro (kód měny EUR) uživatelem CryptoWiz.
 Druhý záznam značí nákup 1.2313 jednotek měny Ethereum (kód měny ETH), opět uživatelem CryptoWiz.
 Můžete předpokládat, že záznamy jsou ve vstupních souborech uvedeny chronologicky a je-li na vstupu více souborů, jejich pořadí je také chronologické.
@@ -77,7 +79,7 @@ Nemusíte kontrolovat korektnost operací vzhledem ke kontextu ostatních operac
 
 Nemusíte kontrolovat korektnost operací vzhledem ke stavu účtu uživatele, např. zda má uživatel na účtu dostatek prostředků na nákup nebo prodej měny (můžete uvažovat, že uživatel má pro tyto operace k dispozici dostatečný margin).
 
-Návratová hodnota
+### Návratová hodnota
 Skript vrací úspěch v případě úspěšné operace. Interní chyba skriptu nebo chybné argumenty budou doprovázeny chybovým hlášením na standardní chybový výstup a neúspěšným návratovým kódem.
 Implementační detaily
 Skript žádný soubor nemodifikuje. Skript nesmí používat dočasné soubory. Povoleny jsou však dočasné soubory nepřímo tvořené jinými příkazy (např. příkazem sed -i).
@@ -108,10 +110,10 @@ Podpora specifikace parametrů a přepínačů [FILTR], [PŘÍKAZ] a UŽIVATEL v
 
 Filtr -c je možné specifikovat vícenásobně. Příkazy list, list-currency, status a profit budou následně uvažovat ty záznamy, které obsahují některou z uvedených měn.
 
-Příklady použití
+### Příklady použití
 Ukázky vstupních log souborů jsou dostupné zde: https://pajda.fit.vutbr.cz/ios/ios-24-1-logs.
 Příklady:
-
+ ```bash
 $ cat cryptoexchange.log
 Trader1;2024-01-15 15:30:42;EUR;-2000.0000
 Trader2;2024-01-15 15:31:12;BTC;-9.8734
@@ -186,3 +188,4 @@ Trader1;2024-01-22 09:17:40;ETH;10.9537
 $ ./xtf -c ETH -c EUR -c GBP list-currency Trader1 cryptoexchange.log
 ETH
 EUR
+```
