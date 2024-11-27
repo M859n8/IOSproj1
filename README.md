@@ -1,6 +1,8 @@
-First project for IOS. 2nd year of bachelor's degree (opakovani), summer semester. Evaluation 12/15.
-1. Úloha IOS (2024)
-Popis úlohy
+# First project for Operating Systems (IOS). 
+2nd year of bachelor's degree (opakovani), summer semester. 
+## Evaluation 
+12/15
+## Úloha IOS (2024). Popis úlohy
 Jako správní technologičtí vizionáři se i Vaše firma rozhodla vytvořit svou vlastní kryptoměnovou burzu, nazvanou XTF (eXtortion, Travesty, Fraud). Burza svým klientům umožňuje vkládat finanční prostředky ve formě kryptoměn i fiat měn; provádět směnu svých prostředků za měny jiné; úschovu prostředků a půjčování prostředků (tzv. margin).
 
 Aby měli uživatelé přehled o svých účtech (a prostředcích na nich), musí Vaše burza vést záznamy o provedených transakcích všech uživatelů. Vaše účetnictví je však velmi nepřehledné a chaotické (tak, jak by to mělo být u každého správného startupu), a všechny záznamy jsou tak mezi sebou promíchané a uložené v jednom nebo více textových, příp. komprimovaných, souborech. Přes grafické rozhraní byste však měli každému uživateli zobrazovat pouze záznamy z jeho obchodního účtu. V rámci předzpracování dat pro výstup tak bude zapotřebí záznamy uživatelů filtrovat a třídit.
@@ -9,26 +11,21 @@ Pokud však chcete skutečně uspět na poli kryptoměnových fintech společnos
 
 Přestože jinak zásadně dbáte na využívání těch nejnovějších a nejmodernějších technologií (správné buzzwords Vám zajistí příliv dalšího kapitálu od investorů), v tomto konkrétním případě skutečně dává větší smysl vyřešit problém pomocí shell skriptu a nikoliv natrénované neuronové sítě.
 
-Specifikace rozhraní skriptu
-JMÉNO
-
+## Specifikace rozhraní skriptu
 xtf - skript pro předzpracování logů z Vaší kryptoměnové burzy.
-POUŽITÍ
-
+### POUŽITÍ
 xtf [-h|--help] [FILTR] [PŘÍKAZ] UŽIVATEL LOG [LOG2 [...]
-VOLBY
-
-PŘÍKAZ může být jeden z:
-list – výpis záznamů pro daného uživatele.
-list-currency – výpis seřazeného seznamu vyskytujících se měn.
-status – výpis skutečného stavu účtu seskupeného a seřazeného dle jednotlivých měn.
-profit – výpis stavu účtu zákazníka se započítaným fiktivním výnosem.
-FILTR může být kombinace následujících:
--a DATETIME – after: jsou uvažovány pouze záznamy PO tomto datu a čase (bez něj). DATETIME je formátu YYYY-MM-DD HH:MM:SS.
--b DATETIME – before: jsou uvažovány pouze záznamy PŘED tímto datem a časem (bez něj).
--c CURRENCY – jsou uvažovány pouze záznamy odpovídající dané měně.
--h a --help vypíšou nápovědu s krátkým popisem každého příkazu a přepínače.
-POPIS
+### PŘÍKAZ může být jeden z:
+ - list – výpis záznamů pro daného uživatele.
+ - list-currency – výpis seřazeného seznamu vyskytujících se měn.
+ - status – výpis skutečného stavu účtu seskupeného a seřazeného dle jednotlivých měn.
+ - profit – výpis stavu účtu zákazníka se započítaným fiktivním výnosem.
+ - FILTR může být kombinace následujících:
+ - -a DATETIME – after: jsou uvažovány pouze záznamy PO tomto datu a čase (bez něj). DATETIME je formátu YYYY-MM-DD HH:MM:SS.
+ - -b DATETIME – before: jsou uvažovány pouze záznamy PŘED tímto datem a časem (bez něj).
+ - -c CURRENCY – jsou uvažovány pouze záznamy odpovídající dané měně.
+ - -h a --help vypíšou nápovědu s krátkým popisem každého příkazu a přepínače.
+### POPIS
 
 Skript filtruje, seskupuje a vypisuje záznamy z logů kryptoměnové burzy. Pokud je skriptu zadán příkaz, nad filtrovanými záznamy daný příkaz provede.
 
@@ -42,7 +39,7 @@ status spočítá a vypíše stav účtu pro každou měnu uživatele UŽIVATEL 
 
 profit je podobný příkazu status s tím rozdílem, že kladné zůstatky měn jsou uměle navýšeny o X %, kde X je hodnota proměnné prostředí XTF_PROFIT. Jste však trochu zapomnětliví a občas tak zapomenete proměnnou nastavit. Pokud není proměnná prostředí XTF_PROFIT nastavena, uvažujte výchozí hodnotu 20 % (příliš vysoké zhodnocení by mohlo přitáhnout nechtěnou pozornost regulačních úřadů). Hodnota proměnné XTF_PROFIT bude vždy pouze nezáporné celé číslo.
 
-DETAILY
+### DETAILY
 
 Pokud skript nedostane na vstupu žádný příkaz, uvažujte výchozí příkaz list.
 
@@ -54,11 +51,11 @@ Předpokládejte, že hodnota vstupního parametru UŽIVATEL není shodná s hod
 
 V případě uvedení přepínače -h nebo --help se vždy pouze vypíše nápověda a skript skončí (tedy, pokud by za přepínačem následoval nějaký příkaz nebo soubor, neprovede se).
 
-Vstupní log soubory
+### Vstupní log soubory
 Skript analyzuje záznamy (logy) pouze ze zadaných souborů v daném pořadí.
 
 Formát logu je CSV, kde oddělovačem je znak středníku ;. Formát je řádkový, každý řádek odpovídá záznamu transakce provedené na kryptoměnové burze ve tvaru
-
+ ```bash
 JMENO UZIVATELE;DATUM A CAS;MENA;HODNOTA
 kde
 
@@ -66,7 +63,7 @@ JMENO UZIVATELE označuje uživatelské jméno klienta. Pro jednoduchost uvažuj
 DATUM A CAS jsou ve formátu YYYY-MM-DD HH:MM:SS
 MENA je třípísmenný kód (krypto)měny, např USD, EUR, CZK, BTC, ETH atd.
 HODNOTA je hodnota transakce. Záporná hodnota značí prodej (resp. výběr) a kladná hodnota značí nákup (resp. vložení) měny. HODNOTA je desetinné číslo s přesností na čtyři desetinná místa s tečkou jako oddělovacím znakem.
-Příklad záznamů:
+### Příklad záznamů:
 
 CryptoWiz;2024-01-14 23:43:13;EUR;-3000.0000
 CryptoWiz;2024-01-14 23:43:15;ETH;1.2313
